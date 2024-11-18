@@ -1,0 +1,11 @@
+version: "3"
+
+services:
+  fastapi:
+    build: .
+    volumes:
+      - type: bind
+        source: ./app
+        target: /code/app
+    ports:
+      - "8000:80"
