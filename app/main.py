@@ -36,9 +36,17 @@ def message():
 def get_movies():
     return dbmovies 
 
-@app.get('/movie/{id}', tags=['Movies'])
+@app.get('/movies/{id}', tags=['Movies'])
 def get_movie(id: int):
     for movie in dbmovies:
         if movie['id'] == id:
             return movie
     return []
+
+@app.get('/movies/', tags=['Movies'])
+def get_movie_by_category(category: str, year: int):
+    for movie in dbmovies:
+        if movie['category'] == category:
+            return movie
+    return []
+
