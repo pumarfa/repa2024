@@ -50,6 +50,7 @@ def get_movie_by_category(category: str, year: int):
             return movie
     return []
 
+# Clase 8
 @app.post('/movies', tags=['Movies'])
 def create_movie(id: int = Body(), title: str = Body(), overview: str = Body(), year: int = Body(), rating: float = Body(), category: str = Body()):
     dbmovies.append({
@@ -61,6 +62,26 @@ def create_movie(id: int = Body(), title: str = Body(), overview: str = Body(), 
         "category":category 
         })
     
+    return dbmovies 
+
+# clase 9 - Método PUT y DELETE
+@app.put('/movies/{id}', tags=['Movies'])
+def update_movie(id: int, title: str = Body(), overview: str = Body(), year: int = Body(), rating: float = Body(), category: str = Body()):
+    for movie in dbmovies:
+        if movie['id'] == id:
+            movie['title'] = title
+            movie['overview'] = overview 
+            movie['year'] = year 
+            movie['rating'] = rating 
+            movie['category'] = category 
+
+    return dbmovies        
+    
+@app.delete('/movies/{id}', tags=['Movies'])
+def delete_movie(id: int ):
+    for movie in dbmovies:
+        if movie['id'] == id:
+            dbmovies.remove(movie)
     return dbmovies 
 
 
