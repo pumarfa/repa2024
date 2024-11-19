@@ -17,6 +17,14 @@ dbmovies = [
         "year":"2009",
         "rating":7.8,
         "category":"Accion"
+        },
+        {
+        "id":2,
+        "title":"Avenger",
+        "overview":"Ante la amenaza de un terrible dictador galactico...",
+        "year":"2004",
+        "rating":6.7,
+        "category":"Accion"
         }
         ]
 
@@ -25,6 +33,12 @@ def message():
     return "Hello World!"
 
 @app.get('/movies', tags=['Movies'])
-def movies():
+def get_movies():
     return dbmovies 
 
+@app.get('/movie/{id}', tags=['Movies'])
+def get_movie(id: int):
+    for movie in dbmovies:
+        if movie['id'] == id:
+            return movie
+    return []
