@@ -1,7 +1,9 @@
 from fastapi import FastAPI, Body
 from fastapi.responses import HTMLResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional, List
+
+import datetime 
 
 app = FastAPI()
 app.title = "REPA IAViM - 2024"
@@ -15,12 +17,21 @@ class Movie (BaseModel):
     rating: float
     category: str
 
+class MovieCreate (BaseModel):
+    id: int
+    title: str =Field(min_length=5, max_length=15)
+    overview: str = Field(min_length=0, max_length=150)
+    year: int = Field(ge=1890, le=datetime.date.today().year)
+    rating: float = Field(ge=0, le=10)
+    category: str = Field(min_length=0, max_length=30)
+
 class MovieUpdate (BaseModel):
-    title: str
-    overview: str
-    year: int
-    rating: float
-    category: str
+    title: str =Field(min_length=5, max_length=15)
+    overview: str = Field(min_length=0, max_length=150)
+    year: int = Field(ge=1890, le=datetime.date.today().year)
+    rating: float = Field(ge=0, le=10)
+    category: str = Field(min_length=0, max_length=30)
+
 #
 # Listado de películas de ejemplo
 #
@@ -48,10 +59,16 @@ dbmovies = [
 def message():
     return "Hello World!"
 
+#
+# Obtener un objeto con todas las películas
+#
 @app.get('/movies', tags=['Movies'])
 def get_movies()->List[Movie]:
     return dbmovies 
 
+#
+# Obtener un objeto con una pelicula por su ID
+#
 @app.get('/movies/{id}', tags=['Movies'])
 def get_movie(id: int)-> Movie:
     for movie in dbmovies:
@@ -59,6 +76,9 @@ def get_movie(id: int)-> Movie:
             return movie
     return []
 
+#
+# Obtener una objeto con una película por su categoria
+#
 @app.get('/movies/', tags=['Movies'])
 def get_movie_by_category(category: str, year: int)->Movie:
     for movie in dbmovies:
@@ -67,12 +87,16 @@ def get_movie_by_category(category: str, year: int)->Movie:
     return []
 
 # Clase 8
+# Crear un objeto pelicula e insertarlo en la base de datos
+#
 @app.post('/movies', tags=['Movies'])
-def create_movie(movie:Movie)->List[Movie]:
+def create_movie(movie:MovieCreate)->List[Movie]:
     dbmovies.append(movie.model_dump())
     return dbmovies 
 
 # clase 9 - Método PUT y DELETE
+# Crear un objeto película, buscar y reemplazar en la base de datos
+#
 @app.put('/movies/{id}', tags=['Movies'])
 def update_movie(id: int, movie:MovieUpdate)->List[Movie]:
     for item in dbmovies:
@@ -84,7 +108,10 @@ def update_movie(id: int, movie:MovieUpdate)->List[Movie]:
             item['category'] = movie.category 
 
     return dbmovies        
-    
+
+#
+# Buscar un objeto película en la base de datos y borrrlo
+#
 @app.delete('/movies/{id}', tags=['Movies'])
 def delete_movie(id: int )->Movie:
     for movie in dbmovies:
