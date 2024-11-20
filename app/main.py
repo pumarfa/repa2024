@@ -21,14 +21,27 @@ class MovieCreate (BaseModel):
     id: int
     title: str =Field(min_length=5, max_length=15)
     overview: str = Field(min_length=0, max_length=150)
-    year: int = Field(ge=1890, le=datetime.date.today().year)
+    year: int = Field(ge=1900, le=datetime.date.today().year)
     rating: float = Field(ge=0, le=10)
     category: str = Field(min_length=0, max_length=30)
+
+    model_config = {
+        'json_schema_extra':{
+            'example':{
+                'id':0,
+                'title':'My Movie',
+                'overview':'Esta es un apelícula de ...',
+                'year': 1900,
+                'rating': 1.0,
+                'category':'Drama'
+                }
+            }
+        }
 
 class MovieUpdate (BaseModel):
     title: str =Field(min_length=5, max_length=15)
     overview: str = Field(min_length=0, max_length=150)
-    year: int = Field(ge=1890, le=datetime.date.today().year)
+    year: int = Field(ge=1900, le=datetime.date.today().year)
     rating: float = Field(ge=0, le=10)
     category: str = Field(min_length=0, max_length=30)
 
@@ -36,24 +49,7 @@ class MovieUpdate (BaseModel):
 # Listado de películas de ejemplo
 #
 
-dbmovies = [
-        {
-        "id":1,
-        "title":"Avatar",
-        "overview":"En un exuberante planeta llamado pandora",
-        "year":"2009",
-        "rating":7.8,
-        "category":"Accion"
-        },
-        {
-        "id":2,
-        "title":"Avenger",
-        "overview":"Ante la amenaza de un terrible dictador galactico...",
-        "year":"2004",
-        "rating":6.7,
-        "category":"Accion"
-        }
-        ]
+dbmovies: List[Movie] = []
 
 @app.get('/', tags=['Home'])
 def message():
@@ -64,7 +60,7 @@ def message():
 #
 @app.get('/movies', tags=['Movies'])
 def get_movies()->List[Movie]:
-    return dbmovies 
+    return [movie.model_dump() for movie in dbmovies ] 
 
 #
 # Obtener un objeto con una pelicula por su ID
@@ -73,7 +69,7 @@ def get_movies()->List[Movie]:
 def get_movie(id: int)-> Movie:
     for movie in dbmovies:
         if movie['id'] == id:
-            return movie
+            return movie.model_dump
     return []
 
 #
@@ -83,7 +79,7 @@ def get_movie(id: int)-> Movie:
 def get_movie_by_category(category: str, year: int)->Movie:
     for movie in dbmovies:
         if movie['category'] == category:
-            return movie
+            return movie.model_dump
     return []
 
 # Clase 8
@@ -91,8 +87,8 @@ def get_movie_by_category(category: str, year: int)->Movie:
 #
 @app.post('/movies', tags=['Movies'])
 def create_movie(movie:MovieCreate)->List[Movie]:
-    dbmovies.append(movie.model_dump())
-    return dbmovies 
+    dbmovies.append(movie)
+    return [ movie.model_dump() for movie in dbmovies ] 
 
 # clase 9 - Método PUT y DELETE
 # Crear un objeto película, buscar y reemplazar en la base de datos
@@ -106,8 +102,7 @@ def update_movie(id: int, movie:MovieUpdate)->List[Movie]:
             item['year'] = movie.year 
             item['rating'] = movie.rating 
             item['category'] = movie.category 
-
-    return dbmovies        
+    return [movie.model_dump() for movie in dbmovies ] 
 
 #
 # Buscar un objeto película en la base de datos y borrrlo
@@ -117,6 +112,6 @@ def delete_movie(id: int )->Movie:
     for movie in dbmovies:
         if movie['id'] == id:
             dbmovies.remove(movie)
-    return dbmovies 
+    return [movie.model_dump() for movie in dbmovies ] 
 
 
