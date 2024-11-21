@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Body, Path, Query
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
 from pydantic import BaseModel, Field
 from typing import Optional, List
 
@@ -8,6 +8,8 @@ import datetime
 app = FastAPI()
 app.title = "REPA IAViM - 2024"
 app.version = "0.0.1"
+
+some_file_path = "./file.pdf"
 
 class Movie (BaseModel):
     id: int
@@ -116,5 +118,12 @@ def delete_movie(id: int=Path(ge=0) )->Movie:
             dbmovies.remove(movie)
     content = [movie.model_dump() for movie in dbmovies ] 
     return JSONResponse(content = content)
+
+#
+# Responder con un archivo
+#
+@app.get('/get_file', response_class=FileResponse, tags=['Home'])
+def get_file():
+    return some_file_path
 
 
