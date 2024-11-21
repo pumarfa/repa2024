@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Body, Path, Query
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from pydantic import BaseModel, Field
 from typing import Optional, List
 
@@ -60,7 +60,8 @@ def message():
 #
 @app.get('/movies', tags=['Movies'])
 def get_movies()->List[Movie]:
-    return [movie.model_dump() for movie in dbmovies ] 
+    content = [movie.model_dump() for movie in dbmovies ] 
+    return JSONResponse(content = content)
 
 #
 # Obtener un objeto con una pelicula por su ID
@@ -69,8 +70,8 @@ def get_movies()->List[Movie]:
 def get_movie(id: int= Path(ge=0))-> Movie | dict:
     for movie in dbmovies:
         if movie.id == id:
-            return movie.model_dump()
-    return {}
+            return JSONResponse(content = movie.model_dump())
+    return JSONResponse(content = {})
 
 #
 # Obtener una objeto con una película por su categoria
@@ -79,8 +80,8 @@ def get_movie(id: int= Path(ge=0))-> Movie | dict:
 def get_movie_by_category(category: str= Query(min_length=0, max_length=30))-> Movie | dict:
     for movie in dbmovies:
         if movie.category == category:
-            return movie.model_dump()
-    return {}
+            return JSONResponse(content =movie.model_dump())
+    return JSONResponse(content = {})
 
 # Clase 8
 # Crear un objeto pelicula e insertarlo en la base de datos
@@ -96,13 +97,14 @@ def create_movie(movie:MovieCreate)->List[Movie]:
 @app.put('/movies/{id}', tags=['Movies'])
 def update_movie(id: int, movie:MovieUpdate)->List[Movie]:
     for item in dbmovies:
-        if item['id'] == id:
-            item['title'] = movie.title
-            item['overview'] = movie.overview 
-            item['year'] = movie.year 
-            item['rating'] = movie.rating 
-            item['category'] = movie.category 
-    return [movie.model_dump() for movie in dbmovies ] 
+        if item.id == id:
+            item.title = movie.title
+            item.overview = movie.overview 
+            item.year = movie.year 
+            item.rating = movie.rating 
+            item.category = movie.category 
+    content = [movie.model_dump() for movie in dbmovies ] 
+    return JSONResponse(content = content)
 
 #
 # Buscar un objeto película en la base de datos y borrrlo
@@ -110,8 +112,9 @@ def update_movie(id: int, movie:MovieUpdate)->List[Movie]:
 @app.delete('/movies/{id}', tags=['Movies'])
 def delete_movie(id: int=Path(ge=0) )->Movie:
     for movie in dbmovies:
-        if movie['id'] == id:
+        if movie.id == id:
             dbmovies.remove(movie)
-    return [movie.model_dump() for movie in dbmovies ] 
+    content = [movie.model_dump() for movie in dbmovies ] 
+    return JSONResponse(content = content)
 
 
